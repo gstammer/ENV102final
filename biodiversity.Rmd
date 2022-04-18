@@ -5,8 +5,40 @@ date: '2022-04-18'
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup message = FALSE, include = FALSE}
+library(tidyverse)
+library(socviz)
+library(sf)
 ```
+
+```{r load-data, message = FALSE, warning = FALSE}
+wdpa_raw <- read_csv("data/WDPA_Mar2022_Public_csv.csv")
+```
+
+```{r clean-data}
+wdpa <- wdpa_raw %>%
+  select(TYPE, WDPAID, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA, STATUS,
+         STATUS_YR, GOV_TYPE, OWN_TYPE)
+```
+
+```{r setup-map}
+theme_worldmap <- function(base_size=9, base_family="") {
+    require(grid)
+    theme_bw(base_size=base_size, base_family=base_family) %+replace%
+        theme(axis.line=element_blank(),
+              axis.text=element_blank(),
+              axis.ticks=element_blank(),
+              axis.title=element_blank(),
+              panel.background=element_blank(),
+              panel.border=element_blank(),
+              panel.grid=element_blank(),
+              panel.spacing=unit(0, "lines"),
+              plot.background=element_blank(),
+              legend.position = "bottom", 
+              legend.direction = "horizontal"
+        )
+}
+```
+
 
 
