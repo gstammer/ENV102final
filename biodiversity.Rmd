@@ -21,6 +21,8 @@ CRgdb <- st_read(dsn = "data/WDPA_Apr2022_Public/WDPA_Apr2022_Public.gdb",
                  layer = "WDPA_poly_Apr2022")
 
 borders <- readOGR(dsn = "data/gadm40_CRI_shp/", layer = "gadm40_CRI_0")
+bordersPAN <- readOGR(dsn = "data/gadm40_PAN_shp/", layer = "gadm40_PAN_0")
+bordersNIC <- readOGR(dsn = "data/gadm40_NIC_shp/", layer = "gadm40_NIC_0")
 ```
 
 ```{r clean-data}
@@ -66,9 +68,11 @@ theme_crmap <- function(base_size=9, base_family="") {
               panel.border=element_blank(),
               panel.grid=element_blank(),
               panel.spacing=unit(0, "lines"),
-              plot.background=element_blank(),
+              plot.background=element_rect(fill = "black"),
               legend.position = "bottom", 
-              legend.direction = "horizontal"
+              legend.direction = "horizontal",
+              legend.background = element_rect(fill = "black"),
+              legend.text = element_text(color = "white")
         )
 }
 ```
@@ -76,18 +80,46 @@ theme_crmap <- function(base_size=9, base_family="") {
 
 ```{r maps}
 borders_tidy <- tidy(borders)
+borders_tidyPAN <- tidy(bordersPAN)
+borders_tidyNIC <- tidy(bordersNIC)
+
 
 ggplot() +
   geom_sf(data = cleanCR, aes(geometry = SHAPE), color = "black",
-          fill = "#69b3a2", size = 0.1) +
+          fill = "#00C1AA", size = 0.1) +
   geom_sf(data = cleanCRmarine, aes(geometry = SHAPE), color = "black",
-          fill = "#5C9ABB", size = 0.1) +
+          fill = "#00B4EF", size = 0.1) +
+  geom_polygon(data = borders_tidy, aes(x = long, y = lat, group = group),
+               fill="transparent", color="white", size = 0.2) +
+  geom_polygon(data = borders_tidyPAN, aes(x = long, y = lat, group = group),
+               fill="transparent", color="white", size = 0.2) +
+  geom_polygon(data = borders_tidyNIC, aes(x = long, y = lat, group = group),
+               fill="transparent", color="white", size = 0.2) +
+  theme_crmap() +
+  xlim(-88, -81) +
+  ylim(7, 16)
+
+ggplot() +
+  geom_sf(data = cleanCR, aes(fill = STATUS_YR, geometry = SHAPE),
+          color = "black", size = 0.1) +
+  geom_sf(data = cleanCRmarine, aes(fill = STATUS_YR, geometry = SHAPE),
+          color = "black", size = 0.1) +
   geom_polygon(data = borders_tidy, aes(x = long, y = lat, group = group),
                fill="transparent", color="white", size = 0.2) +
   theme_crmap() +
   xlim(-87, -81) +
   ylim(7, 12)
 
+ggplot() +
+  geom_sf(data = cleanCR, aes(fill = DESIG_ENG, geometry = SHAPE),
+          color = "black", size = 0.1) +
+  geom_sf(data = cleanCRmarine, aes(fill = DESIG_ENG, geometry = SHAPE),
+          color = "black", size = 0.1) +
+  geom_polygon(data = borders_tidy, aes(x = long, y = lat, group = group),
+               fill="transparent", color="white", size = 0.2) +
+  theme_crmap() +
+  xlim(-87, -82) +
+  ylim(8, 12)
 ```
 
 
