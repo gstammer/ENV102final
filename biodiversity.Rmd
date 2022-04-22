@@ -11,11 +11,16 @@ library(socviz)
 library(sf)
 library(rgdal)
 library(broom)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(maps)
 ```
 
 ```{r load-data, message = FALSE, warning = FALSE}
 CRgdb <- st_read(dsn = "data/WDPA_Apr2022_Public/WDPA_Apr2022_Public.gdb",
                  layer = "WDPA_poly_Apr2022")
+
+borders <- readOGR(dsn = "data/gadm40_CRI_shp/", layer = "gadm40_CRI_0")
 ```
 
 ```{r clean-data}
@@ -24,6 +29,13 @@ tidyCR <- tibble(CRgdb) %>%
 
 cleanCR <- tidyCR %>%
   filter(STATUS == "Designated") %>%
+  filter(MARINE < 1) %>%
+  select(WDPAID, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
+         STATUS_YR, GOV_TYPE, OWN_TYPE, SHAPE)
+
+cleanCRmarine <- tidyCR %>%
+  filter(STATUS == "Designated") %>%
+  filter(MARINE > 0) %>%
   select(WDPAID, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
          STATUS_YR, GOV_TYPE, OWN_TYPE, SHAPE)
 ```
@@ -42,6 +54,41 @@ cleanCR %>%
   count(MARINE)
 ```
 
+```{r map-theme}
+theme_crmap <- function(base_size=9, base_family="") {
+    require(grid)
+    theme_bw(base_size=base_size, base_family=base_family) %+replace%
+        theme(axis.line=element_blank(),
+              axis.text=element_blank(),
+              axis.ticks=element_blank(),
+              axis.title=element_blank(),
+              panel.background=element_rect(fill = "black"),
+              panel.border=element_blank(),
+              panel.grid=element_blank(),
+              panel.spacing=unit(0, "lines"),
+              plot.background=element_blank(),
+              legend.position = "bottom", 
+              legend.direction = "horizontal"
+        )
+}
+```
+
+
+```{r maps}
+borders_tidy <- tidy(borders)
+
+ggplot() +
+  geom_sf(data = cleanCR, aes(geometry = SHAPE), color = "black",
+          fill = "#69b3a2", size = 0.1) +
+  geom_sf(data = cleanCRmarine, aes(geometry = SHAPE), color = "black",
+          fill = "#5C9ABB", size = 0.1) +
+  geom_polygon(data = borders_tidy, aes(x = long, y = lat, group = group),
+               fill="transparent", color="white", size = 0.2) +
+  theme_crmap() +
+  xlim(-87, -81) +
+  ylim(7, 12)
+
+```
 
 
 
