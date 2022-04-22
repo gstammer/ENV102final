@@ -8,26 +8,52 @@ output: html_document
 ```{r setup message = FALSE, include = FALSE}
 library(tidyverse)
 library(socviz)
-library(wdpar)
+library(sf)
+library(rgdal)
+library(broom)
 ```
 
 ```{r load-data, message = FALSE, warning = FALSE}
-wdpa_raw <- read_csv("data/WDPA_Mar2022_Public_csv.csv")
+#wdpa_raw <- read_csv("data/WDPA_Mar2022_Public_csv.csv")
+
+spdf1 <- readOGR( 
+  dsn= paste0(getwd(),"/data/WDPA_Apr2022_Public_shp/WDPA_Apr2022_Public_shp_0/") , 
+  layer="WDPA_Apr2022_Public_shp-polygons",
+  verbose=FALSE
+)
+spdf2 <- readOGR( 
+  dsn= paste0(getwd(),"/data/WDPA_Apr2022_Public_shp/WDPA_Apr2022_Public_shp_1/") , 
+  layer="WDPA_Apr2022_Public_shp-polygons",
+  verbose=FALSE
+)
+spdf3 <- readOGR( 
+  dsn= paste0(getwd(),"/data/WDPA_Apr2022_Public_shp/WDPA_Apr2022_Public_shp_2/") , 
+  layer="WDPA_Apr2022_Public_shp-polygons",
+  verbose=FALSE
+)
 ```
 
 ```{r clean-data}
-wdpa <- wdpa_raw %>%
-  select(TYPE, WDPAID, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA, STATUS,
-         STATUS_YR, GOV_TYPE, OWN_TYPE)
+spdf1@data <- tibble(spdf1@data) %>%
+  select(WDPAID, ISO3, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
+         STATUS, STATUS_YR, GOV_TYPE)
+spdf2@data <- tibble(spdf2@data) %>%
+  select(WDPAID, ISO3, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
+         STATUS, STATUS_YR, GOV_TYPE)
+spdf3@data <- tibble(spdf3@data) %>%
+  select(WDPAID, ISO3, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
+         STATUS, STATUS_YR, GOV_TYPE)
+
+usadata1 <- spdf1@data %>%
+  filter(ISO3 == "USA")
+usadata2 <- spdf2@data %>%
+  filter(ISO3 == "USA")
+usadata3 <- spdf3@data %>%
+  filter(ISO3 == "USA")
 ```
 
-```{r wdpar-setup}
-usa_raw_pa_data <- wdpa_fetch(
-  "USA", wait = TRUE, download_dir = rappdirs::user_data_dir("wdpar")
-  )
-
-usa_pa_data <- wdpa_clean(usa_raw_pa_data)
+```{r}
+tidyspdf1 <- tidy(spdf1)
 ```
-
 
 
