@@ -14,46 +14,36 @@ library(broom)
 ```
 
 ```{r load-data, message = FALSE, warning = FALSE}
-#wdpa_raw <- read_csv("data/WDPA_Mar2022_Public_csv.csv")
-
-spdf1 <- readOGR( 
-  dsn= paste0(getwd(),"/data/WDPA_Apr2022_Public_shp/WDPA_Apr2022_Public_shp_0/") , 
-  layer="WDPA_Apr2022_Public_shp-polygons",
-  verbose=FALSE
-)
-spdf2 <- readOGR( 
-  dsn= paste0(getwd(),"/data/WDPA_Apr2022_Public_shp/WDPA_Apr2022_Public_shp_1/") , 
-  layer="WDPA_Apr2022_Public_shp-polygons",
-  verbose=FALSE
-)
-spdf3 <- readOGR( 
-  dsn= paste0(getwd(),"/data/WDPA_Apr2022_Public_shp/WDPA_Apr2022_Public_shp_2/") , 
-  layer="WDPA_Apr2022_Public_shp-polygons",
-  verbose=FALSE
-)
+CRgdb <- st_read(dsn = "data/WDPA_Apr2022_Public/WDPA_Apr2022_Public.gdb",
+                 layer = "WDPA_poly_Apr2022")
 ```
 
 ```{r clean-data}
-spdf1@data <- tibble(spdf1@data) %>%
-  select(WDPAID, ISO3, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
-         STATUS, STATUS_YR, GOV_TYPE)
-spdf2@data <- tibble(spdf2@data) %>%
-  select(WDPAID, ISO3, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
-         STATUS, STATUS_YR, GOV_TYPE)
-spdf3@data <- tibble(spdf3@data) %>%
-  select(WDPAID, ISO3, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
-         STATUS, STATUS_YR, GOV_TYPE)
+tidyCR <- tibble(CRgdb) %>%
+  filter(ISO3 == "CRI")
 
-usadata1 <- spdf1@data %>%
-  filter(ISO3 == "USA")
-usadata2 <- spdf2@data %>%
-  filter(ISO3 == "USA")
-usadata3 <- spdf3@data %>%
-  filter(ISO3 == "USA")
+cleanCR <- tidyCR %>%
+  filter(STATUS == "Designated") %>%
+  select(WDPAID, NAME, DESIG_ENG, DESIG_TYPE, MARINE, GIS_AREA,
+         STATUS_YR, GOV_TYPE, OWN_TYPE, SHAPE)
 ```
 
-```{r}
-tidyspdf1 <- tidy(spdf1)
+```{r quick-analysis}
+cleanCR %>%
+  count(GOV_TYPE)
+
+cleanCR %>%
+  count(OWN_TYPE)
+
+cleanCR %>%
+  count(DESIG_ENG)
+
+cleanCR %>%
+  count(MARINE)
 ```
+
+
+
+
 
 
